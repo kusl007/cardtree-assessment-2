@@ -124,18 +124,17 @@ export function SynchronizedGridLayout() {
 
   const getSizeClasses = (size: ItemSize, isMobile: boolean) => {
     if (isMobile) {
-      // In mobile view, all items stack vertically with different heights
       switch (size) {
         case "small":
-          return "min-h-[100px]"
+          return "min-h-[100px] col-span-1"
         case "medium":
-          return "min-h-[140px]"
+          return "min-h-[140px] col-span-1"
         case "large":
-          return "min-h-[180px]"
+          return "min-h-[180px] col-span-2"
         case "wide":
-          return "min-h-[120px]"
+          return "min-h-[120px] col-span-2"
         case "tall":
-          return "min-h-[200px]"
+          return "min-h-[200px] col-span-1"
       }
     } else {
       // In desktop view, items have different grid spans and heights
@@ -161,7 +160,7 @@ export function SynchronizedGridLayout() {
           <div>
             <p className="text-sm text-gray-700">
               <span className="font-medium text-gray-900">Current View:</span>{" "}
-              {isMobile ? "Mobile (Vertical Stack)" : "Desktop (Grid Layout)"}
+              {isMobile ? "Mobile (2-Column Grid)" : "Desktop (Multi-Column Grid)"}
             </p>
             <p className="text-sm text-gray-700">
               <span className="font-medium text-gray-900">Item Order:</span>{" "}
@@ -187,8 +186,8 @@ export function SynchronizedGridLayout() {
           <div className="rounded-md bg-blue-50 p-4">
             <p className="text-sm text-blue-800">
               <span className="font-semibold">How it works:</span> Drag items to reorder them. The order is synchronized
-              between desktop (grid) and mobile (vertical) views. Changes are saved to localStorage and persist across
-              sessions. Static items (0, 5, 10, 15, 20) cannot be moved. Boxes now have different sizes!
+              between desktop and mobile grid views. Changes are saved to localStorage and persist across sessions.
+              Static items (0, 5, 10, 15, 20) cannot be moved. Boxes have different sizes that span multiple columns!
             </p>
           </div>
         </div>
@@ -197,7 +196,7 @@ export function SynchronizedGridLayout() {
       <div
         className={`gap-4 ${
           isMobile
-            ? "flex flex-col"
+            ? "grid grid-cols-2 auto-rows-min grid-flow-dense"
             : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 auto-rows-min grid-flow-dense"
         }`}
       >

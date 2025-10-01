@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 
-type ItemSize = "small" | "medium" | "large" | "wide" | "tall"
+type ItemSize = "small" | "large" | "wide" | "tall"
 
 interface GridItem {
   id: string
@@ -12,7 +12,8 @@ interface GridItem {
 }
 
 const generateItems = (count: number): GridItem[] => {
-  const sizes: ItemSize[] = ["small", "medium", "large", "wide", "tall"]
+  // Only use small, large, wide, tall
+  const sizes: ItemSize[] = ["small", "large", "wide", "tall"]
   return Array.from({ length: count }, (_, i) => ({
     id: i.toString(),
     isStatic: i % 5 === 0,
@@ -103,7 +104,7 @@ export function SynchronizedGridLayout() {
     setItemOrder(defaultOrder)
   }
 
-  // Modified: Accept index to force first item to always span full width on mobile
+  // Accept index to force first item to always span full width on mobile
   const getSizeClasses = (size: ItemSize, isMobile: boolean, index: number) => {
     if (isMobile) {
       if (index === 0) {
@@ -112,8 +113,6 @@ export function SynchronizedGridLayout() {
       switch (size) {
         case "small":
           return "min-h-[100px] col-span-1"
-        case "medium":
-          return "min-h-[140px] col-span-1"
         case "large":
           return "min-h-[180px] col-span-2"
         case "wide":
@@ -125,8 +124,6 @@ export function SynchronizedGridLayout() {
       switch (size) {
         case "small":
           return "min-h-[100px] col-span-1"
-        case "medium":
-          return "min-h-[140px] col-span-1"
         case "large":
           return "min-h-[180px] col-span-2"
         case "wide":

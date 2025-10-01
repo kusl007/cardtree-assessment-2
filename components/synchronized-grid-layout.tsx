@@ -1,10 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 
-// Generate initial items
 type ItemSize = "small" | "medium" | "large" | "wide" | "tall"
 
 interface GridItem {
@@ -17,8 +15,8 @@ const generateItems = (count: number): GridItem[] => {
   const sizes: ItemSize[] = ["small", "medium", "large", "wide", "tall"]
   return Array.from({ length: count }, (_, i) => ({
     id: i.toString(),
-    isStatic: i % 5 === 0, // Make every 5th item static
-    size: sizes[i % sizes.length], // Cycle through different sizes
+    isStatic: i % 5 === 0,
+    size: sizes[i % sizes.length],
   }))
 }
 
@@ -29,18 +27,13 @@ export function SynchronizedGridLayout() {
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
   const [dragOverItem, setDragOverItem] = useState<string | null>(null)
 
-  // Check if mobile on mount and window resize
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedOrder = localStorage.getItem("grid-item-order")
     if (savedOrder) {
@@ -53,7 +46,6 @@ export function SynchronizedGridLayout() {
     }
   }, [])
 
-  // Save order to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("grid-item-order", JSON.stringify(itemOrder))
   }, [itemOrder])
@@ -66,7 +58,6 @@ export function SynchronizedGridLayout() {
     }
     setDraggedItem(itemId)
     e.dataTransfer.effectAllowed = "move"
-    // Add ghost image for better drag feedback
     if (e.currentTarget instanceof HTMLElement) {
       e.dataTransfer.setDragImage(e.currentTarget, e.currentTarget.offsetWidth / 2, e.currentTarget.offsetHeight / 2)
     }
@@ -75,15 +66,10 @@ export function SynchronizedGridLayout() {
   const handleDragOver = (e: React.DragEvent, itemId: string) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
-
-    if (draggedItem !== itemId) {
-      setDragOverItem(itemId)
-    }
+    if (draggedItem !== itemId) setDragOverItem(itemId)
   }
 
-  const handleDragLeave = () => {
-    setDragOverItem(null)
-  }
+  const handleDragLeave = () => setDragOverItem(null)
 
   const handleDragEnd = () => {
     setDraggedItem(null)
@@ -92,21 +78,16 @@ export function SynchronizedGridLayout() {
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault()
-
     if (!draggedItem || draggedItem === targetId) {
       setDraggedItem(null)
       setDragOverItem(null)
       return
     }
-
     const newOrder = [...itemOrder]
     const draggedIndex = newOrder.indexOf(draggedItem)
     const targetIndex = newOrder.indexOf(targetId)
-
-    // Remove dragged item and insert at target position
     newOrder.splice(draggedIndex, 1)
     newOrder.splice(targetIndex, 0, draggedItem)
-
     setItemOrder(newOrder)
     setDraggedItem(null)
     setDragOverItem(null)
@@ -122,8 +103,12 @@ export function SynchronizedGridLayout() {
     setItemOrder(defaultOrder)
   }
 
-  const getSizeClasses = (size: ItemSize, isMobile: boolean) => {
+  // Modified: Accept index to force first item to always span full width on mobile
+  const getSizeClasses = (size: ItemSize, isMobile: boolean, index: number) => {
     if (isMobile) {
+      if (index === 0) {
+        return "min-h-[100px] col-span-2"
+      }
       switch (size) {
         case "small":
           return "min-h-[100px] col-span-1"
@@ -137,7 +122,6 @@ export function SynchronizedGridLayout() {
           return "min-h-[200px] col-span-1"
       }
     } else {
-      // In desktop view, items have different grid spans and heights
       switch (size) {
         case "small":
           return "min-h-[100px] col-span-1"
@@ -167,7 +151,6 @@ export function SynchronizedGridLayout() {
               <span className="font-mono">[{itemOrder.join(", ")}]</span>
             </p>
           </div>
-
           <div className="flex flex-wrap gap-2">
             <button
               onClick={generateNewLayout}
@@ -182,7 +165,6 @@ export function SynchronizedGridLayout() {
               Reset to Default
             </button>
           </div>
-
           <div className="rounded-md bg-blue-50 p-4">
             <p className="text-sm text-blue-800">
               <span className="font-semibold">How it works:</span> Drag items to reorder them. The order is synchronized
@@ -192,21 +174,18 @@ export function SynchronizedGridLayout() {
           </div>
         </div>
       </div>
-
       <div
         className={`gap-4 ${
           isMobile
-            ? "grid grid-cols-2 auto-rows-min grid-flow-dense"
+            ? "grid grid-cols-2 auto-rows-min grid-flow-row"
             : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 auto-rows-min grid-flow-dense"
         }`}
       >
-        {itemOrder.map((itemId) => {
+        {itemOrder.map((itemId, idx) => {
           const item = items.find((i) => i.id === itemId)
           if (!item) return null
-
           const isDragging = draggedItem === item.id
           const isDragOver = dragOverItem === item.id
-
           return (
             <div
               key={item.id}
@@ -219,6 +198,7 @@ export function SynchronizedGridLayout() {
               className={`flex items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all ${getSizeClasses(
                 item.size,
                 isMobile,
+                idx
               )} ${
                 item.isStatic
                   ? "border-blue-300 bg-blue-50 text-blue-700 cursor-not-allowed"
